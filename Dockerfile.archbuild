@@ -1,0 +1,9 @@
+FROM archlinux:base-devel
+
+RUN pacman -Syu --noconfirm --needed \
+      sudo git openssh gnupg rsync \
+ && useradd -m builder \
+ && printf 'builder ALL=(ALL) NOPASSWD: ALL\n' >/etc/sudoers.d/builder \
+ && chmod 0440 /etc/sudoers.d/builder
+
+WORKDIR /work
