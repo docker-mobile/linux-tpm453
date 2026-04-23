@@ -60,6 +60,7 @@ After you have `*/artifacts/*.pkg.tar.zst` locally (or after pulling them back f
 publish them to GitHub Releases:
 
 ```bash
+./sign-artifacts.sh
 ./publish-github-releases.sh YOUR_GITHUB_USER linux-tpm453
 ```
 

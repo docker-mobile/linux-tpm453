@@ -28,12 +28,13 @@ ssh_base=(
   "${remote_user}@${remote_host}"
 )
 
-rsync_base=(
+rsync_upload=(
   rsync
   -e "ssh -F $ssh_config_file -i $ssh_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
   -a
   --delete
   --exclude .git
+  --exclude .docker-cache
   --exclude aur-out
   --exclude '*/artifacts'
   --exclude '*/cache'
@@ -44,9 +45,15 @@ rsync_base=(
   --exclude '*.sig'
 )
 
+rsync_download=(
+  rsync
+  -e "ssh -F $ssh_config_file -i $ssh_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+  -a
+)
+
 printf '[remote] syncing repo to %s:%s\n' "$remote_host" "$remote_workdir"
 "${ssh_base[@]}" "mkdir -p '$remote_workdir'"
-"${rsync_base[@]}" "$repo_root/" "${remote_user}@${remote_host}:${remote_workdir}/"
+"${rsync_upload[@]}" "$repo_root/" "${remote_user}@${remote_host}:${remote_workdir}/"
 
 remote_args=()
 for arg in "$@"; do
@@ -71,7 +78,7 @@ printf '[remote] building variant: %s\n' "$variant"
 
 printf '[remote] syncing artifacts back from %s\n' "$remote_host"
 mkdir -p "$repo_root/$variant/artifacts"
-"${rsync_base[@]}" "${remote_user}@${remote_host}:${remote_workdir}/${variant}/artifacts/" "$repo_root/$variant/artifacts/"
+"${rsync_download[@]}" "${remote_user}@${remote_host}:${remote_workdir}/${variant}/artifacts/" "$repo_root/$variant/artifacts/"
 
 printf '[remote] done. artifacts are on the server under:\n'
 printf '  %s/%s/artifacts\n' "$remote_workdir" "$variant"
