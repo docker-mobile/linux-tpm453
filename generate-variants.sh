@@ -6,12 +6,12 @@ upstream_root="/home/arian/linux-cachyos-src"
 lsmod_source="/home/arian/kernel-tmp453-lts/lsmod-tmp453.txt"
 
 variants=(
-  "lts|linux-cachyos-lts|LTS|linux-tpm453-lts|Hardware-specific CachyOS LTS kernel for Acer TMP453-M class hardware|tag|cachyos-6.18.23-1|6.18.23|6.18.23|Signed CachyOS LTS release tag cachyos-6.18.23-1"
-  "stable|linux-cachyos|Stable|linux-tpm453-stable|Hardware-specific CachyOS stable kernel for Acer TMP453-M class hardware|commit|2a5a214aa4d81291700b74b09d882b1a09a9a257|7.0.0.r20260422.g2a5a214aa4d|7.0.0|7.0/fixes snapshot at 2a5a214aa4d"
-  "mainline|linux-cachyos|Mainline|linux-tpm453-mainline|Hardware-specific CachyOS mainline kernel for Acer TMP453-M class hardware|commit|31d2c7db1c919a5b0b60eb9d88c80415c04238b5|7.0.0.r20260422.g31d2c7db1c9|7.0.0|7.0/base snapshot at 31d2c7db1c9"
-  "release|linux-cachyos|Release|linux-tpm453-release|Hardware-specific CachyOS release-channel kernel for Acer TMP453-M class hardware|tag|cachyos-7.0.0-2|7.0.0|7.0.0|Signed CachyOS release tag cachyos-7.0.0-2"
-  "rc|linux-cachyos-rc|RC|linux-tpm453-rc|Hardware-specific CachyOS release-candidate kernel for Acer TMP453-M class hardware|tag|cachyos-7.0-rc7-3|7.0.rc7|7.0-rc7|Signed CachyOS RC release tag cachyos-7.0-rc7-3"
-  "edge|linux-cachyos-rc|Edge|linux-tpm453-edge|Hardware-specific CachyOS edge-preview kernel for Acer TMP453-M class hardware|commit|09d54799a73eb003725e7b8a6b9d80cb7145347c|7.0.0rc5.r20260422.g09d54799a73e|7.0.0-rc5|7.0/cachy snapshot at 09d54799a73e"
+  "lts|linux-cachyos-lts|LTS|linux-tpm453-lts|Hardware-specific CachyOS LTS kernel for Acer TMP453-M class hardware|tag|cachyos-6.18.24-1|6.18.24|6.18.24|Signed CachyOS LTS release tag cachyos-6.18.24-1|6.18|24|1|1||bore"
+  "stable|linux-cachyos|Stable|linux-tpm453-stable|Hardware-specific CachyOS stable kernel for Acer TMP453-M class hardware|commit|2a5a214aa4d81291700b74b09d882b1a09a9a257|7.0.1.r20260421.g2a5a214aa4d|7.0.1|7.0/fixes snapshot at 2a5a214aa4d|7.0|1|3|1||bore"
+  "mainline|linux-cachyos|Mainline|linux-tpm453-mainline|Hardware-specific CachyOS mainline kernel for Acer TMP453-M class hardware|commit|a3418d70e282c6275d5eeccf0f019051666fa856|7.0.1.r20260423.ga3418d70e28|7.0.1|7.0/base snapshot at a3418d70e28 with EEVDF|7.0|1|3|1||eevdf"
+  "release|linux-cachyos|Release|linux-tpm453-release|Hardware-specific CachyOS release-channel kernel for Acer TMP453-M class hardware|tag|cachyos-7.0.1-3|7.0.1|7.0.1|Signed CachyOS release tag cachyos-7.0.1-3|7.0|1|3|1||bore"
+  "rc|linux-cachyos-rc|RC|linux-tpm453-rc|Hardware-specific CachyOS release-candidate kernel for Acer TMP453-M class hardware|tag|cachyos-7.0-rc7-3|7.0.rc7|7.0-rc7|Signed CachyOS RC release tag cachyos-7.0-rc7-3|7.0|0|3|2|rc7|bore"
+  "edge|linux-cachyos-rc|Edge|linux-tpm453-edge|Hardware-specific CachyOS edge-preview kernel for Acer TMP453-M class hardware|commit|7e6c35d1ea6da4fa14a9db2e71d5835ca9636f19|7.0.1.r20260423.g7e6c35d1ea6|7.0.1|7.0/cachy snapshot at 7e6c35d1ea6 with EEVDF|7.0|1|3|1||eevdf"
 )
 
 profile_snippet="$(mktemp)"
@@ -216,9 +216,15 @@ patch_pkgbuild() {
     local source_ref="$5"
     local pkgver_override="$6"
     local source_kernelver="$7"
+    local version_major="$8"
+    local version_minor="$9"
+    local version_tagrel="${10}"
+    local release_pkgrel="${11}"
+    local rcver="${12}"
+    local cpu_scheduler="${13}"
 
     sed -i \
-        -e 's|^: "${_cpusched:=.*}"|: "${_cpusched:=bore}"|' \
+        -e "s|^: \"\\\${_cpusched:=.*}\"|: \"\\\${_cpusched:=${cpu_scheduler}}\"|" \
         -e 's|^: "${_localmodcfg:=.*}"|: "${_localmodcfg:=yes}"|' \
         -e 's|^: "${_localmodcfg_path:=.*}"|: "${_localmodcfg_path:="$startdir/lsmod-tpm453.txt"}"|' \
         -e 's|^: "${_use_current:=.*}"|: "${_use_current:=no}"|' \
@@ -238,6 +244,15 @@ patch_pkgbuild() {
 
     sed -i "s|^pkgdesc=.*$|pkgdesc='${desc}'|" "$pkg"
     sed -i 's|^_kernuname=.*$|_kernuname="${pkgver}-${_custom_kernsuffix}"|' "$pkg"
+    sed -i "s|^_major=.*$|_major=${version_major}|" "$pkg"
+    sed -i "s|^_minor=.*$|_minor=${version_minor}|" "$pkg"
+    sed -i "s|^_tagrel=.*$|_tagrel=${version_tagrel}|" "$pkg"
+    sed -i "s|^pkgrel=.*$|pkgrel=${release_pkgrel}|" "$pkg"
+    sed -i "s|^pkgver=.*$|pkgver=${pkgver_override}|" "$pkg"
+
+    if [[ -n "$rcver" ]]; then
+        sed -i "s|^_rcver=.*$|_rcver=${rcver}|" "$pkg"
+    fi
 
     perl -0pi -e "s/^pkgbase=.*\$/_custom_pkgbase=\"linux-tpm453-${variant}\"\n_custom_kernsuffix=\"\\\${_custom_pkgbase#linux-}\"\n\npkgbase=\"\\\$_custom_pkgbase\"/m" "$pkg"
 
@@ -248,23 +263,45 @@ patch_pkgbuild() {
     sed -i 's#make "${BUILD_FLAGS\[@\]}" LSMOD="${_localmodcfg_path}" localmodconfig#yes "" | make "${BUILD_FLAGS[@]}" LSMOD="${_localmodcfg_path}" localmodconfig >/dev/null#' "$pkg"
 
     perl -0pi -e 's~(\n    if \[ "\$_localmodcfg" = "yes" \]; then.*?\n    fi\n)~\1\n    _apply_tpm453_profile\n~s' "$pkg"
+    if [[ "$cpu_scheduler" == "eevdf" ]]; then
+        sed -i 's|        -e SCHED_BORE \\|        -d SCHED_BORE \\|' "$pkg"
+    fi
     perl -0pi -e 's~echo "Rewrite configuration\.\.\."\n    make "\$\{BUILD_FLAGS\[\@\]\}" prepare\n    yes "" \| make "\$\{BUILD_FLAGS\[\@\]\}" config >/dev/null~echo "Rewrite configuration..."\n    make "\${BUILD_FLAGS[@]}" olddefconfig\n    make "\${BUILD_FLAGS[@]}" prepare~s' "$pkg"
     perl -0pi -e 's~build\(\) \{\n    cd "\$_srcname"\n    make "\$\{BUILD_FLAGS\[\@\]\}" -j"\$\(nproc\)" all~build() {\n    cd "\$_srcname"\n    local build_jobs="\${TPM453_BUILD_JOBS:-\$(nproc)}"\n    make "\${BUILD_FLAGS[@]}" -j"\${build_jobs}" all~s' "$pkg"
     perl -0pi -e 's~CFLAGS= CXXFLAGS= LDFLAGS= make "\$\{BUILD_FLAGS\[\@\]\}" "\$\{MODULE_FLAGS\[\@\]\}" -j\$\(nproc\) modules~CFLAGS= CXXFLAGS= LDFLAGS= make "\${BUILD_FLAGS[@]}" "\${MODULE_FLAGS[@]}" -j"\${build_jobs}" modules~s' "$pkg"
     perl -0pi -e 's~make "\$\{BUILD_FLAGS\[\@\]\}" KERNELDIR="\$srcdir/\$_srcname" -j\$\(nproc\) modules~make "\${BUILD_FLAGS[@]}" KERNELDIR="\$srcdir/\$_srcname" -j"\${build_jobs}" modules~s' "$pkg"
 
+    case "$variant" in
+        lts)
+            sed -i "s|^_stable=.*$|_stable=${source_kernelver}|" "$pkg"
+            sed -i "s|^_srctag=.*$|_srctag=${source_ref}|" "$pkg"
+            sed -i 's|^_srcname=.*$|_srcname=${_srctag}|' "$pkg"
+            ;;
+        release)
+            sed -i "s|^_srcname=.*$|_srcname=${source_ref}|" "$pkg"
+            ;;
+        rc)
+            sed -i "s|^_stable=.*$|_stable=${source_kernelver}|" "$pkg"
+            sed -i "s|^_srctag=.*$|_srctag=${source_ref}|" "$pkg"
+            sed -i 's|^_srcname=.*$|_srcname=${_srctag}|' "$pkg"
+            ;;
+    esac
+
     if [[ "$source_mode" == "commit" ]]; then
-        sed -i "s|^pkgver=.*$|pkgver=${pkgver_override}|" "$pkg"
         sed -i "s|^_srcname=.*$|_srcname=linux-${source_ref}|" "$pkg"
         sed -i "/^_kernuname=/c\\_source_kernelver=\"${source_kernelver}\"\\n_kernuname=\"\${_source_kernelver}-\${_custom_kernsuffix}\"" "$pkg"
         perl -0pi -e 's~source=\(\n.*?\n    "config"\)~source=(\n    "\${_srcname}.tar.gz::https://codeload.github.com/CachyOS/linux/tar.gz/'"${source_ref}"'"\n    "config")~s' "$pkg"
+
+        if [[ "$variant" == "edge" ]]; then
+            perl -0pi -e 's/^_rcver=.*\n//m; s/^\#_stable=.*\n//mg; s/^_stable=.*\n//m; s/^_srctag=.*\n//m' "$pkg"
+        fi
     fi
 
     perl -0pi -e "s~(?:b2sums|sha256sums)=\\(.*?\\)~sha256sums=('SKIP'\\n        'SKIP'\\n        'SKIP'\\n        'SKIP')~s" "$pkg"
 }
 
 for row in "${variants[@]}"; do
-    IFS='|' read -r variant template channel pkgname desc source_mode source_ref pkgver_override source_kernelver source_lane <<<"$row"
+    IFS='|' read -r variant template channel pkgname desc source_mode source_ref pkgver_override source_kernelver source_lane version_major version_minor version_tagrel release_pkgrel rcver cpu_scheduler <<<"$row"
     target="$repo_root/$variant"
 
     mkdir -p "$target"
@@ -272,7 +309,7 @@ for row in "${variants[@]}"; do
     cp "$upstream_root/$template/config" "$target/config"
     cp "$lsmod_source" "$target/lsmod-tpm453.txt"
 
-    patch_pkgbuild "$target/PKGBUILD" "$variant" "$desc" "$source_mode" "$source_ref" "$pkgver_override" "$source_kernelver"
+    patch_pkgbuild "$target/PKGBUILD" "$variant" "$desc" "$source_mode" "$source_ref" "$pkgver_override" "$source_kernelver" "$version_major" "$version_minor" "$version_tagrel" "$release_pkgrel" "$rcver" "$cpu_scheduler"
     write_variant_files "$target" "$variant" "$channel" "$pkgname" "$template" "$source_lane"
 
     (
