@@ -70,3 +70,9 @@ export TPM453_RELEASE_BASE_URL="https://github.com/YOUR_GITHUB_USER/linux-tpm453
 ./make-bin-manifest-from-artifacts.sh
 ./generate-bin-variants.sh
 ```
+
+Or run the end-to-end `-bin` publication path after release assets are uploaded:
+
+```bash
+./publish-bin-aur-from-github.sh YOUR_GITHUB_USER linux-tpm453
+```
