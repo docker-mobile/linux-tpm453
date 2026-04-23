@@ -47,6 +47,12 @@ Build on a remote Arch host (key-based SSH) and keep your laptop out of the loop
 ./remote-build.sh 103.21.248.26.sslip.io stable --syncdeps
 ```
 
+Build the full matrix sequentially on the remote host:
+
+```bash
+./remote-build-all.sh 103.21.248.26 --syncdeps
+```
+
 If the remote host is not Arch but has Docker, the repo will fall back to an Arch Linux
 container automatically via `docker-build.sh`.
 
