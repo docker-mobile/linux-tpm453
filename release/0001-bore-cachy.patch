@@ -867,7 +867,7 @@ index ee2fd37ca..add5b0132 100644
  /*
   * The initial- and re-scaling of tunables is configurable
   *
-@@ -67,28 +71,32 @@
+@@ -71,16 +75,29 @@
   *   SCHED_TUNABLESCALING_LOG - scaled logarithmically, *1+ilog(ncpus)
   *   SCHED_TUNABLESCALING_LINEAR - scaled linear, *ncpus
   *
@@ -889,10 +889,6 @@ index ee2fd37ca..add5b0132 100644
 + * (default min_base_slice = 2000000 constant, units: nanoseconds)
 + * EEVDF: default 0.70 msec * (1 + ilog(ncpus)), units: nanoseconds
   */
--#ifdef CONFIG_CACHY
--unsigned int sysctl_sched_base_slice			= 400000ULL;
--static unsigned int normalized_sysctl_sched_base_slice	= 400000ULL;
--#else
 +#ifdef CONFIG_SCHED_BORE
 +static const unsigned int nsecs_per_tick       = 1000000000ULL / HZ;
 +unsigned int sysctl_sched_min_base_slice       = CONFIG_MIN_BASE_SLICE_NS;
@@ -900,14 +896,9 @@ index ee2fd37ca..add5b0132 100644
 +#else /* !CONFIG_SCHED_BORE */
  unsigned int sysctl_sched_base_slice			= 700000ULL;
  static unsigned int normalized_sysctl_sched_base_slice	= 700000ULL;
--#endif /* CONFIG_CACHY */
 +#endif /* CONFIG_SCHED_BORE */
  
--#ifdef CONFIG_CACHY
--__read_mostly unsigned int sysctl_sched_migration_cost	= 400000UL;
--#else
  __read_mostly unsigned int sysctl_sched_migration_cost	= 500000UL;
--#endif
  
  static int __init setup_sched_thermal_decay_shift(char *str)
  {
@@ -1225,4 +1216,3 @@ index fd2760ee6..de7fd529d 100644
  extern int sysctl_resched_latency_warn_once;
 -- 
 2.53.0
-
