@@ -53,6 +53,12 @@ Build the full matrix sequentially on the remote host:
 ./remote-build-all.sh 103.21.248.26 --syncdeps
 ```
 
+If builds are running directly on the remote host already, pull back all finished artifacts:
+
+```bash
+./sync-remote-artifacts.sh 103.21.248.26
+```
+
 If the remote host is not Arch but has Docker, the repo will fall back to an Arch Linux
 container automatically via `docker-build.sh`.
 
