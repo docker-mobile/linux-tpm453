@@ -46,6 +46,10 @@ for variant in "$@"; do
     [[ -e "$repo/$file" ]] && staged_files+=("$file")
   done
 
+  for patch in "$repo"/*.patch; do
+    [[ -f "$patch" ]] && staged_files+=("$(basename "$patch")")
+  done
+
   git -C "$repo" add "${staged_files[@]}"
 
   if git -C "$repo" diff --cached --quiet; then

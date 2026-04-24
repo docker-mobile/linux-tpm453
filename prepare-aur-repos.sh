@@ -36,6 +36,11 @@ for variant in "${variants[@]}"; do
         cp "$src/$file" "$dst/$file"
     done
 
+    for patch in "$src"/*.patch; do
+        [[ -f "$patch" ]] || continue
+        cp "$patch" "$dst/$(basename "$patch")"
+    done
+
     if [[ -f "$dst/build-on-server.sh" ]]; then
         chmod +x "$dst/build-on-server.sh"
     fi
