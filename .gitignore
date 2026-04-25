@@ -1,4 +1,6 @@
 aur-out/
+bin-release-manifest.tsv
+*-bin/
 */artifacts/
 */cache/
 */pkg/
