@@ -35,7 +35,14 @@ for variant in "${variants[@]}"; do
   pkgrel="$(bash -lc "source '$pkgbuild'; printf '%s' \"\$pkgrel\"")"
   tag="${pkgbase}-${pkgver}-${pkgrel}"
 
-  mapfile -t assets < <(find "$artifacts" -maxdepth 1 -type f \( -name '*.pkg.tar.zst' -o -name '*.pkg.tar.zst.sig' \) | sort)
+  shopt -s nullglob
+  assets=(
+    "$artifacts/${pkgbase}-${pkgver}-${pkgrel}-"*.pkg.tar.zst
+    "$artifacts/${pkgbase}-${pkgver}-${pkgrel}-"*.pkg.tar.zst.sig
+    "$artifacts/${pkgbase}-headers-${pkgver}-${pkgrel}-"*.pkg.tar.zst
+    "$artifacts/${pkgbase}-headers-${pkgver}-${pkgrel}-"*.pkg.tar.zst.sig
+  )
+  shopt -u nullglob
   if [[ ${#assets[@]} -eq 0 ]]; then
     printf '[%s] no package assets found in %s\n' "$variant" "$artifacts" >&2
     exit 1
@@ -53,4 +60,3 @@ for variant in "${variants[@]}"; do
   printf '%s -> https://github.com/%s/%s/releases/tag/%s\n' \
     "$variant" "$owner" "$repo" "$tag"
 done
-

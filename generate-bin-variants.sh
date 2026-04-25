@@ -31,7 +31,6 @@ pkgver=${pkgver}
 pkgrel=${pkgrel}
 pkgdesc="Prebuilt TPM453 ${variant} kernel package"
 arch=('x86_64')
-url="https://github.com/CachyOS/linux-cachyos"
 license=('GPL-2.0-only')
 options=('!strip' '!debug')
 depends=('coreutils' 'kmod' 'initramfs')
@@ -41,6 +40,7 @@ makedepends=('libarchive' 'zstd')
 _release_base_url='${release_base_url}'
 _kernel_asset='${kernel_asset}'
 _headers_asset='${headers_asset}'
+url="\${_release_base_url%/releases/download/*}"
 source=(
   "\${_kernel_asset}::\${_release_base_url}/\${_kernel_asset}"
   "\${_headers_asset}::\${_release_base_url}/\${_headers_asset}"
@@ -134,4 +134,3 @@ EOF
     makepkg --printsrcinfo > .SRCINFO
   )
 done < "$manifest"
-
